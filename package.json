@@ -1,0 +1,11 @@
+{
+  "name": "frontend-project-lvl2",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "gendiff": "bin/gendiff.js"
+  },
+  "dependencies": {
+    "commander": "^6.1.0"
+  }
+}
