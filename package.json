@@ -1,6 +1,7 @@
 {
   "name": "frontend-project-lvl2",
   "version": "1.0.0",
+  "main": "index.js",
   "type": "module",
   "bin": {
     "gendiff": "bin/gendiff.js"
