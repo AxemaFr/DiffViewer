@@ -3,6 +3,9 @@ install: install-deps
 run:
 	node bin/gendiff.js tree1.json tree2.json
 
+install-deps:
+	npm ci
+
 test:
 	npm test
 
