@@ -1,13 +1,24 @@
 import fs from 'fs';
 import path from 'path';
+import yaml from 'js-yaml';
 
 const getFullPath = (filepath) => path.resolve(process.cwd(), filepath);
-const getData = (filepath) => JSON.parse(fs.readFileSync(filepath, 'utf-8'));
+const getData = (filepath) => fs.readFileSync(filepath, 'utf-8');
 
-export default function index(path1, path2) {
-  const firstData = getData(getFullPath(path1));
-  const secondData = getData(getFullPath(path2));
+function getParser(filePath) {
+  const format = path.extname(filePath);
 
+  switch (format) {
+    case '.yml':
+      return yaml.safeLoad;
+    case '.json':
+      return JSON.parse;
+    default:
+      return JSON.parse;
+  }
+}
+
+function getFilesDifference(firstData, secondData) {
   const combinedObjectsEntriesUnion = Object.entries({ ...firstData, ...secondData })
     .sort((a, b) => (a[0] > b[0] ? 1 : -1));
 
@@ -50,4 +61,14 @@ export default function index(path1, path2) {
     return diffAcc;
   }, [])
     .map((diffObj) => `  ${diffObj.symbol} ${diffObj.key}: ${diffObj.value}`);
+}
+
+export default function index(path1, path2) {
+  const parser1 = getParser(path1);
+  const parser2 = getParser(path2);
+
+  const firstData = parser1(getData(getFullPath(path1)));
+  const secondData = parser2(getData(getFullPath(path2)));
+
+  return getFilesDifference(firstData, secondData);
 }

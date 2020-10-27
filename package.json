@@ -10,7 +10,8 @@
     "test": "npx -n --experimental-vm-modules jest"
   },
   "dependencies": {
-    "commander": "^6.1.0"
+    "commander": "^6.1.0",
+    "js-yaml": "^3.14.0"
   },
   "devDependencies": {
     "@jest/globals": "^26.6.1",

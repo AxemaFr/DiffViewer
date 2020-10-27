@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import program from 'commander';
-import genDiff from '../src/index.js';
+import getFilesDifference from '../src/index.js';
 
 program
   .version('0.0.1')
@@ -10,6 +10,6 @@ program
   .action((path1, path2) => {
     // Вывод на экран происходит здесь, а не внутри библиотеки
     // eslint-disable-next-line no-console
-    console.log(genDiff(path1, path2));
+    console.log(getFilesDifference(path1, path2));
   })
   .parse(process.argv);
