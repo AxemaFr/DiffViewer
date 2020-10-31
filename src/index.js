@@ -1,74 +1,60 @@
 import fs from 'fs';
+import _ from 'lodash';
 import path from 'path';
-import yaml from 'js-yaml';
+import selectParser from './parser.js';
+import selectFormatter from './formatters/index.js';
 
-const getFullPath = (filepath) => path.resolve(process.cwd(), filepath);
-const getData = (filepath) => fs.readFileSync(filepath, 'utf-8');
+const getParsedContent = (filepath) => {
+  const extension = _.trimStart(path.extname(filepath), '.');
+  const parse = selectParser(extension);
 
-function getParser(filePath) {
-  const format = path.extname(filePath);
+  const content = fs.readFileSync(filepath, 'utf8');
 
-  switch (format) {
-    case '.yml':
-      return yaml.safeLoad;
-    case '.json':
-      return JSON.parse;
-    default:
-      return JSON.parse;
-  }
-}
+  return parse(content);
+};
 
-function getFilesDifference(firstData, secondData) {
-  const combinedObjectsEntriesUnion = Object.entries({ ...firstData, ...secondData })
-    .sort((a, b) => (a[0] > b[0] ? 1 : -1));
+const genInternalDiff = (parsedContent1, parsedContent2) => {
+  const union = { ...parsedContent1, ...parsedContent2 };
+  const keys = Object.keys(union).sort();
 
-  return combinedObjectsEntriesUnion.reduce((diffAcc, currentEntrie) => {
-    if (!Object.prototype.hasOwnProperty.call(firstData, currentEntrie[0])) {
-      diffAcc.push({
-        symbol: '+',
-        key: currentEntrie[0],
-        value: currentEntrie[1],
-      });
-      return diffAcc;
-    }
-    if (!Object.prototype.hasOwnProperty.call(secondData, currentEntrie[0])) {
-      diffAcc.push({
-        symbol: '-',
-        key: currentEntrie[0],
-        value: currentEntrie[1],
-      });
-      return diffAcc;
-    }
-    if (firstData[currentEntrie[0]] === secondData[currentEntrie[0]]) {
-      diffAcc.push({
-        symbol: ' ',
-        key: currentEntrie[0],
-        value: currentEntrie[1],
-      });
-      return diffAcc;
+  const entries = keys.map((key) => {
+    if (!Object.prototype.hasOwnProperty.call(parsedContent2, key)) {
+      return { type: 'removed', key, value: parsedContent1[key] };
     }
 
-    diffAcc.push({
-      symbol: '-',
-      key: currentEntrie[0],
-      value: firstData[currentEntrie[0]],
-    });
-    diffAcc.push({
-      symbol: '+',
-      key: currentEntrie[0],
-      value: currentEntrie[1],
-    });
-    return diffAcc;
-  }, [])
-    .map((diffObj) => `  ${diffObj.symbol} ${diffObj.key}: ${diffObj.value}`);
-}
+    if (!Object.prototype.hasOwnProperty.call(parsedContent1, key)) {
+      return { type: 'added', key, value: parsedContent2[key] };
+    }
 
-export default function index(path1, path2) {
-  const parser1 = getParser(path1);
-  const parser2 = getParser(path2);
+    const oldValue = parsedContent1[key];
+    const newValue = parsedContent2[key];
 
-  const firstData = parser1(getData(getFullPath(path1)));
-  const secondData = parser2(getData(getFullPath(path2)));
+    if (_.isPlainObject(oldValue) && _.isPlainObject(newValue)) {
+      return { key, type: 'parent', children: genInternalDiff(oldValue, newValue) };
+    }
 
-  return getFilesDifference(firstData, secondData);
-}
+    if (_.isEqual(oldValue, newValue)) {
+      return { key, type: 'unchanged', value: oldValue };
+    }
+
+    return {
+      key, type: 'updated', value: { oldValue, newValue },
+    };
+  });
+
+  return entries;
+};
+
+const genDiff = (filepath1, filepath2, outputFormat = 'stylish') => {
+  const parsedContent1 = getParsedContent(filepath1);
+  const parsedContent2 = getParsedContent(filepath2);
+
+  const internalDiff = genInternalDiff(parsedContent1, parsedContent2);
+
+  const genFormattedDiff = selectFormatter(outputFormat);
+  const formattedDiff = genFormattedDiff(internalDiff);
+
+  return `${formattedDiff}\n`;
+};
+
+export default genDiff;

@@ -1,7 +1,7 @@
 install: install-deps
 
 run:
-	node bin/gendiff.js ./__fixtures__/tree1.yml ./__fixtures__/tree2.yml
+	node bin/gendiff.js ./__fixtures__/tree1.json ./__fixtures__/tree2.json
 
 install-deps:
 	npm ci
