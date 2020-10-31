@@ -2,14 +2,23 @@ import fs from 'fs';
 import { test, expect } from '@jest/globals';
 import genDiff from '../src/index.js';
 
-test('stylish diff json', () => {
-  expect(genDiff('./__fixtures__/tree1.json', './__fixtures__/tree2.json')).toBe(
-    fs.readFileSync('./__fixtures__/expected_stylish', 'utf8'),
-  );
-});
+const getFixturesPath = (extName) => [`./__fixtures__/tree1.${extName}`, `./__fixtures__/tree2.${extName}`];
 
-test('stylish diff yml', () => {
-  expect(genDiff('./__fixtures__/tree1.yml', './__fixtures__/tree2.yml')).toBe(
-    fs.readFileSync('./__fixtures__/expected_stylish', 'utf8'),
-  );
+const getExpectedPath = (formatterName) => `./__fixtures__/expected_${formatterName}`;
+
+const testCases = [
+  ['json', 'stylish'],
+  ['yml', 'stylish'],
+  ['json', 'plain'],
+  ['yml', 'plain'],
+  ['json', 'json'],
+  ['yml', 'json'],
+];
+
+test.each(testCases)('deep structures diff: (input file ext: %s, output file ext: %s)', (inputExt, formatterName) => {
+  const [filepath1, filepath2] = getFixturesPath(inputExt);
+
+  const expected = fs.readFileSync(getExpectedPath(formatterName), 'utf8');
+
+  expect(genDiff(filepath1, filepath2, formatterName)).toBe(expected);
 });
