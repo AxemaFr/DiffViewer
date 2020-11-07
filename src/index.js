@@ -14,10 +14,10 @@ const getParsedContent = (filepath) => {
 };
 
 const genInternalDiff = (parsedContent1, parsedContent2) => {
-  const union = { ...parsedContent1, ...parsedContent2 };
-  const keys = Object.keys(union).sort();
+  const keys = _.union(Object.keys(parsedContent1), Object.keys(parsedContent2));
+  const sortedKeys = _.sortBy(keys);
 
-  const entries = keys.map((key) => {
+  return sortedKeys.map((key) => {
     if (!_.has(parsedContent2, key)) {
       return {
         type: 'removed', key, oldValue: parsedContent1[key], newValue: null,
@@ -34,7 +34,7 @@ const genInternalDiff = (parsedContent1, parsedContent2) => {
     const newValue = parsedContent2[key];
 
     if (_.isPlainObject(oldValue) && _.isPlainObject(newValue)) {
-      return { key, type: 'parent', children: genInternalDiff(oldValue, newValue) };
+      return {key, type: 'parent', children: genInternalDiff(oldValue, newValue)};
     }
 
     if (_.isEqual(oldValue, newValue)) {
@@ -47,8 +47,6 @@ const genInternalDiff = (parsedContent1, parsedContent2) => {
       key, type: 'updated', oldValue, newValue,
     };
   });
-
-  return entries;
 };
 
 const genDiff = (filepath1, filepath2, outputFormat = 'stylish') => {
