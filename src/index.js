@@ -19,11 +19,15 @@ const genInternalDiff = (parsedContent1, parsedContent2) => {
 
   const entries = keys.map((key) => {
     if (!_.has(parsedContent2, key)) {
-      return { type: 'removed', key, oldValue: parsedContent1[key], newValue: null };
+      return {
+        type: 'removed', key, oldValue: parsedContent1[key], newValue: null,
+      };
     }
 
     if (!_.has(parsedContent1, key)) {
-      return { type: 'added', key, oldValue: null, newValue: parsedContent2[key] };
+      return {
+        type: 'added', key, oldValue: null, newValue: parsedContent2[key],
+      };
     }
 
     const oldValue = parsedContent1[key];
