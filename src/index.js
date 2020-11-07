@@ -18,12 +18,12 @@ const genInternalDiff = (parsedContent1, parsedContent2) => {
   const keys = Object.keys(union).sort();
 
   const entries = keys.map((key) => {
-    if (!Object.prototype.hasOwnProperty.call(parsedContent2, key)) {
-      return { type: 'removed', key, value: parsedContent1[key] };
+    if (!_.has(parsedContent2, key)) {
+      return { type: 'removed', key, oldValue: parsedContent1[key], newValue: null };
     }
 
-    if (!Object.prototype.hasOwnProperty.call(parsedContent1, key)) {
-      return { type: 'added', key, value: parsedContent2[key] };
+    if (!_.has(parsedContent1, key)) {
+      return { type: 'added', key, oldValue: null, newValue: parsedContent2[key] };
     }
 
     const oldValue = parsedContent1[key];
@@ -34,11 +34,13 @@ const genInternalDiff = (parsedContent1, parsedContent2) => {
     }
 
     if (_.isEqual(oldValue, newValue)) {
-      return { key, type: 'unchanged', value: oldValue };
+      return {
+        key, type: 'unchanged', oldValue, newValue,
+      };
     }
 
     return {
-      key, type: 'updated', value: { oldValue, newValue },
+      key, type: 'updated', oldValue, newValue,
     };
   });
 
@@ -51,10 +53,10 @@ const genDiff = (filepath1, filepath2, outputFormat = 'stylish') => {
 
   const internalDiff = genInternalDiff(parsedContent1, parsedContent2);
 
-  const genFormattedDiff = selectFormatter(outputFormat);
-  const formattedDiff = genFormattedDiff(internalDiff);
+  const getFormattedDiff = selectFormatter(outputFormat);
+  const formattedDiff = getFormattedDiff(internalDiff);
 
-  return `${formattedDiff}\n`;
+  return formattedDiff;
 };
 
 export default genDiff;

@@ -8,7 +8,7 @@ const formatValue = (value) => {
 
 const formatListToPlain = (list, oldPath) => list
   .map(({
-    type, key, value, children,
+    type, key, oldValue, newValue, children,
   }) => {
     const newPath = oldPath ? `${oldPath}.${key}` : `${key}`;
 
@@ -16,9 +16,9 @@ const formatListToPlain = (list, oldPath) => list
       case 'removed':
         return `Property '${newPath}' was removed`;
       case 'added':
-        return `Property '${newPath}' was added with value: ${formatValue(value)}`;
+        return `Property '${newPath}' was added with value: ${formatValue(newValue)}`;
       case 'updated':
-        return `Property '${newPath}' was updated. From ${formatValue(value.oldValue)} to ${formatValue(value.newValue)}`;
+        return `Property '${newPath}' was updated. From ${formatValue(oldValue)} to ${formatValue(newValue)}`;
       case 'unchanged':
         return null;
       case 'parent':

@@ -8,7 +8,6 @@ program
   .description('Compares two configuration files and shows a difference.')
   .option('-f, --format [type]', 'output format', 'stylish')
   .action((path1, path2) => {
-    // Вывод на экран происходит здесь, а не внутри библиотеки
     // eslint-disable-next-line no-console
     console.log(getFilesDifference(path1, path2, program.format));
   })
