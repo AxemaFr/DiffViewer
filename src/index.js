@@ -34,7 +34,7 @@ const genInternalDiff = (parsedContent1, parsedContent2) => {
     const newValue = parsedContent2[key];
 
     if (_.isPlainObject(oldValue) && _.isPlainObject(newValue)) {
-      return {key, type: 'parent', children: genInternalDiff(oldValue, newValue)};
+      return { key, type: 'parent', children: genInternalDiff(oldValue, newValue) };
     }
 
     if (_.isEqual(oldValue, newValue)) {
