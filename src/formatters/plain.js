@@ -12,6 +12,7 @@ const formatListToPlain = (list, oldPath) => list
   }) => {
     const newPath = oldPath ? `${oldPath}.${key}` : `${key}`;
 
+
     switch (type) {
       case 'removed':
         return `Property '${newPath}' was removed`;
